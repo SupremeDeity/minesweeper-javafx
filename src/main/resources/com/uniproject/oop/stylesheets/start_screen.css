@@ -1,0 +1,11 @@
+@font-face {
+  -fx-font-family: "MINE-SWEEPER";
+  font-family: "MINE-SWEEPER";
+  -fx-font-weight: bold;
+  src: url("../assets/mine-sweeper.ttf");
+}
+
+#font {
+  -fx-font-family: "MINE-SWEEPER";
+  font-family: "MINE-SWEEPER";
+}

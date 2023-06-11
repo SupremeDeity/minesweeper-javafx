@@ -2,10 +2,8 @@ package com.uniproject.oop;
 
 import java.io.IOException;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.stage.Stage;
 
 public class StartScreenController {
 

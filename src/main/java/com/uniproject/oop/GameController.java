@@ -1,18 +1,23 @@
 package com.uniproject.oop;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.FlowPane;
 
 enum TileType {
@@ -43,6 +48,7 @@ public class GameController {
 
     List<Integer> bombLocations = new ArrayList<>(App.totalBombs);
     List<Tile> tiles = new ArrayList<>(App.tilesPerCol * App.tilesPerRow);
+    int openedTiles = 0;
     boolean firstMove;
 
     @FXML
@@ -76,10 +82,7 @@ public class GameController {
 
         for (int x = 0; x < (App.tilesPerCol * App.tilesPerRow); x++) {
             Button btn = new Button();
-            btn.setPrefWidth((App.width / App.tilesPerRow));
-            btn.setPrefHeight((App.height / App.tilesPerCol));
-            btn.setStyle(
-                    "-fx-background-color: gray; -fx-border-color: black;");
+            btn.setPrefSize(App.tileSize, App.tileSize);
 
             final int index = x;
             EventHandler<MouseEvent> event = new EventHandler<MouseEvent>() {
@@ -91,17 +94,18 @@ public class GameController {
                                 return;
                             }
                             openTile(index);
-                        } else if (e.getButton() == MouseButton.SECONDARY) {
+                        } else if (e.getButton() == MouseButton.SECONDARY && !tiles.get(index).isOpened) {
                             if (tiles.get(index).isMarked) {
-                                btn.setStyle(
-                                        "-fx-background-color: gray; -fx-border-color: black;");
-                                tiles.get(index).btn.setText("");
+                                tiles.get(index).btn.setGraphic(null);
                                 tiles.get(index).isMarked = false;
                                 return;
                             }
-                            tiles.get(index).btn.setStyle(
-                                    "-fx-background-color: grey; -fx-border-color: red; -fx-text-fill: red; -fx-font-size: 1.0em;");
-                            tiles.get(index).btn.setText("M");
+                            Image markingImage = new Image(getClass().getResourceAsStream("assets/flag.png"),
+                                    App.tileSize,
+                                    App.tileSize, false, true);
+
+                            tiles.get(index).btn.setGraphic(new ImageView(markingImage));
+                            tiles.get(index).btn.setPadding(Insets.EMPTY);
                             tiles.get(index).isMarked = true;
                         }
                     } catch (IOException e1) {
@@ -130,18 +134,56 @@ public class GameController {
         Tile tile = tiles.get(index);
         if (tile.isOpened)
             return;
-        tile.btn.setStyle(
-                "-fx-background-color: white; -fx-border-color: grey; -fx-text-fill: red; -fx-font-size: 1.0em;");
+
         tile.isOpened = true;
 
         // Check if the current tile contains a bomb
         if (tile.tileType == TileType.BOMB) {
             App.setRoot("game_over");
         } else if (tile.tileType == TileType.EMPTY) {
-            tile.btn.setText("");
+            openedTiles++;
+            tile.btn.setStyle(
+                    "-fx-background-color: LightGray; -fx-border-color: gray;");
             openNeighboringTiles(index);
         } else {
-            tile.btn.setText("" + tile.count);
+            openedTiles++;
+            String imgPath = "assets/";
+            switch (tile.count) {
+                case 1:
+                    imgPath += "1.png";
+                    break;
+                case 2:
+                    imgPath += "2.png";
+                    break;
+                case 3:
+                    imgPath += "3.png";
+                    break;
+                case 4:
+                    imgPath += "4.png";
+                    break;
+                case 5:
+                    imgPath += "5.png";
+                    break;
+                case 6:
+                    imgPath += "6.png";
+                    break;
+                case 7:
+                    imgPath += "7.png";
+                    break;
+                case 8:
+                    imgPath += "8.png";
+                    break;
+            }
+            Image image = new Image(getClass()
+                    .getResourceAsStream(imgPath), App.tileSize, App.tileSize, false, true);
+            tile.btn.setPadding(Insets.EMPTY);
+            tile.btn.setGraphic(new ImageView(image));
+        }
+
+        int totalNonBombTiles = (App.tilesPerCol * App.tilesPerRow) - App.totalBombs;
+        if (openedTiles == totalNonBombTiles) {
+            // Player has revealed all non-bomb tiles and won the game
+            App.setRoot("game_won");
         }
 
     }
